@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+<script src="raphael-min.js"></script>
+<script src="underscore-min.js"></script>
+<script src="sequence-diagram-min.js"></script>
+</head>
+<body>
+
+
+<h1>Notebook Server as a Proxy &#x25c6;&#x25c6;</h1>
+<div id="diagram">
+    
+</div>
+
+<pre id='txt'>
+title: User browses to localhost:8888/notebooks/example.ipynb
+participant browser
+participant notebook\nserver
+participant kernel
+notebook\nserver->notebook\nserver:grabs kernelspec from .ipynb
+notebook\nserver->kernel: starts up the kernel
+note right of notebook\nserver: ZeroMQ connection started 
+browser->notebook\nserver: fetches notebook file\n/api/contents/example.ipynb
+notebook\nserver->browser:
+browser-browser: parses .ipynb JSON structure\ncreates JS representation
+note left of browser: example.ipynb \n contents rendered
+browser->notebook\nserver: fetches /api/sessions\nto get websocket URL
+notebook\nserver->browser:
+note right of browser: websockets connection started 
+notebook\nserver-->browser: Jupyter Protocol\nover websockets
+browser-->notebook\nserver:
+notebook\nserver-->kernel: Jupyter Protocol\n over ZeroMQ
+kernel-->notebook\nserver: 
+note left of browser: User types "x=42"\nin a cell and\nexecutes it
+browser->notebook\nserver: Execute "x=42"
+notebook\nserver->kernel: Execute "x=42"
+browser-browser: In[*]
+kernel-kernel: x=42
+kernel->notebook\nserver: OK, execution count=1
+notebook\nserver->browser: OK, execution count=1
+browser-browser: In[1]
+</pre>
+
+<script> 
+  var diagram = Diagram.parse(document.getElementById('txt').innerText);
+    diagram.drawSVG("diagram", {theme: 'simple'});
+
+    document.getElementById('txt').innerText = '';
+</script>
+<!-- 
+or use jQuery to do all the work:
+<div class="diagram">A->B: Message</div>
+<script>
+$(".diagram").sequenceDiagram({theme: 'hand'});
+
+--> 
+
+</script>
+</body>
+</html>
